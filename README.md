@@ -1,39 +1,62 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Basific
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+一個簡單的 Flutter package，提供基本的計算功能。
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## 功能
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- 簡單的數字加一計算器
+- 輕量級且易於使用
+- 完整的測試覆蓋
 
-## Features
+## 開始使用
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+在您的 `pubspec.yaml` 中新增依賴：
 
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  basific: ^0.0.1
 ```
 
-## Additional information
+然後運行：
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```bash
+flutter pub get
+```
+
+## 使用方法
+
+```dart
+import 'package:basific/basific.dart';
+
+void main() {
+  final calculator = Calculator();
+  
+  print(calculator.addOne(5)); // 輸出: 6
+  print(calculator.addOne(-3)); // 輸出: -2
+  print(calculator.addOne(0)); // 輸出: 1
+}
+```
+
+## 範例應用程式
+
+查看 `/example` 資料夾中的完整 Flutter 應用程式範例，展示如何在實際應用中使用此 package。
+
+要運行範例：
+
+```bash
+cd example
+flutter pub get
+flutter run
+```
+
+## 測試
+
+運行測試：
+
+```bash
+flutter test
+```
+
+## 額外資訊
+
+這個 package 是一個簡單的範例，展示如何創建和發布 Flutter packages。
