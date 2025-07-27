@@ -1,13 +1,19 @@
 import 'package:basific_example/pages/users_page.dart';
+import 'package:basific_example/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:basific/basific.dart';
 import '../widgets/calculator_card.dart';
 import '../widgets/control_buttons.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({
+    super.key, 
+    required this.title,
+    this.currentUser,
+  });
 
   final String title;
+  final Map<String, dynamic>? currentUser;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -39,6 +45,38 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('登出'),
+          content: const Text('確定要登出嗎？'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(),
+                  ),
+                );
+              },
+              child: const Text('確定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +89,26 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          if (widget.currentUser != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Center(
+                child: Text(
+                  '歡迎，${widget.currentUser!['name']}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                _logout();
+              },
+              tooltip: '登出',
+            ),
+          ],
+        ],
       ),
       body: Center(
         child: Column(
