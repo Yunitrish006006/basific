@@ -1,5 +1,4 @@
 import 'package:basific_example/pages/users_page.dart';
-import 'package:basific_example/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:basific/basific.dart';
 import '../widgets/calculator_card.dart';
@@ -13,7 +12,7 @@ class MyHomePage extends StatefulWidget {
   });
 
   final String title;
-  final Map<String, dynamic>? currentUser;
+  final BasificUser? currentUser;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -65,7 +64,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
+                    builder: (context) => BasificLoginPage(
+                      title: 'Basific Example Login',
+                      onLoginSuccess: (user) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                              title: 'Basific Example',
+                              currentUser: user,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -95,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.only(right: 8.0),
               child: Center(
                 child: Text(
-                  '歡迎，${widget.currentUser!['name']}',
+                  '歡迎，${widget.currentUser!.name}',
                   style: const TextStyle(fontSize: 14),
                 ),
               ),

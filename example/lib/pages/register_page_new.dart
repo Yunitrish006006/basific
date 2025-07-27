@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:basific/basific.dart';
 import 'login_page.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return BasificRegisterPage(

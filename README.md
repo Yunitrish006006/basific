@@ -1,62 +1,80 @@
 # Basific
 
-一個簡單的 Flutter package，提供基本的計算功能。
+A comprehensive Flutter package for authentication and user management with Supabase integration. Provides ready-to-use login, registration, and user management components.
 
-## 功能
+## Features
 
-- 簡單的數字加一計算器
-- 輕量級且易於使用
-- 完整的測試覆蓋
+- 🔐 **Complete Authentication System** - Login and registration with validation
+- 👥 **User Management** - CRUD operations for user accounts
+- 🎨 **Customizable UI** - Themeable components that match your app design
+- 🗃️ **Supabase Integration** - Built-in support for Supabase backend
+- 📱 **Ready-to-use Components** - Drop-in widgets for common auth flows
+- ⚙️ **Configurable** - Flexible table and column name mapping
 
-## 開始使用
+## Installation
 
-在您的 `pubspec.yaml` 中新增依賴：
+Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  basific: ^0.0.1
+  basific: ^1.0.0
 ```
 
-然後運行：
+## Quick Start
 
-```bash
-flutter pub get
-```
-
-## 使用方法
+### 1. Initialize Basific
 
 ```dart
 import 'package:basific/basific.dart';
 
-void main() {
-  final calculator = Calculator();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   
-  print(calculator.addOne(5)); // 輸出: 6
-  print(calculator.addOne(-3)); // 輸出: -2
-  print(calculator.addOne(0)); // 輸出: 1
+  // Initialize Basific with your Supabase credentials
+  await Basific.initialize(
+    BasificConfig(
+      supabaseUrl: 'YOUR_SUPABASE_URL',
+      supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
+    ),
+  );
+  
+  runApp(MyApp());
 }
 ```
 
-## 範例應用程式
+### 2. Database Setup
 
-查看 `/example` 資料夾中的完整 Flutter 應用程式範例，展示如何在實際應用中使用此 package。
+Create a table in your Supabase database:
 
-要運行範例：
-
-```bash
-cd example
-flutter pub get
-flutter run
+```sql
+CREATE TABLE account (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  account TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  name TEXT NOT NULL,
+  level TEXT DEFAULT 'user'
+);
 ```
 
-## 測試
+### 3. Use Components
 
-運行測試：
+```dart
+// Login Page
+BasificLoginPage(
+  onLoginSuccess: (user) {
+    // Navigate to home
+  },
+)
 
-```bash
-flutter test
+// User Management
+BasificUserManager(
+  title: 'Manage Users',
+  showAddButton: true,
+)
 ```
 
-## 額外資訊
+## Requirements
 
-這個 package 是一個簡單的範例，展示如何創建和發布 Flutter packages。
+- Flutter 3.0.0+
+- Dart 3.8.1+
+- Supabase project
