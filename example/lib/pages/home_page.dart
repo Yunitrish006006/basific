@@ -1,3 +1,4 @@
+import 'package:basific_example/pages/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:basific/basific.dart';
 import '../widgets/calculator_card.dart';
@@ -55,6 +56,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            // go to users page
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UsersPage()),
+                );
+              },
+              child: const Text('Go to Users Page'),
+            ),
             const Text(
               'Basific Calculator Demo',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
