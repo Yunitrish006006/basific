@@ -12,20 +12,12 @@ class BasificRegisterPage extends StatefulWidget {
   
   /// Custom logo widget
   final Widget? logo;
-  
-  /// Available user levels
-  final List<String> availableLevels;
-  
-  /// Default user level
-  final String defaultLevel;
 
   const BasificRegisterPage({
     super.key,
     this.onRegisterSuccess,
     this.title,
     this.logo,
-    this.availableLevels = const ['user', 'admin'],
-    this.defaultLevel = 'user',
   });
 
   @override
@@ -33,7 +25,7 @@ class BasificRegisterPage extends StatefulWidget {
 }
 
 class _BasificRegisterPageState extends State<BasificRegisterPage> {
-  final _accountController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -41,17 +33,10 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
-  late String _selectedLevel;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedLevel = widget.defaultLevel;
-  }
 
   @override
   void dispose() {
-    _accountController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _nameController.dispose();
@@ -69,10 +54,9 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
 
     try {
       final result = await BasificAuth.register(
-        account: _accountController.text.trim(),
+        email: _emailController.text.trim(),
         password: _passwordController.text,
         name: _nameController.text.trim(),
-        level: _selectedLevel,
       );
 
       if (result.isSuccess && result.user != null) {
@@ -148,12 +132,13 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
                   ),
                   const SizedBox(height: 30),
                   
-                  // Account input
+                  // Email input
                   TextFormField(
-                    controller: _accountController,
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Account',
-                      prefixIcon: const Icon(Icons.person),
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(theme.borderRadius),
                       ),
@@ -161,14 +146,16 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
                         borderRadius: BorderRadius.circular(theme.borderRadius),
                         borderSide: BorderSide(color: theme.primaryColor, width: 2),
                       ),
-                      helperText: 'Account name for login',
+                      helperText: 'Email address for login',
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter an account name';
+                        return 'Please enter an email address';
                       }
-                      if (value.trim().length < 3) {
-                        return 'Account must be at least 3 characters';
+                      // Basic email validation
+                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                      if (!emailRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid email address';
                       }
                       return null;
                     },
@@ -197,37 +184,6 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Level selection
-                  if (widget.availableLevels.length > 1)
-                    DropdownButtonFormField<String>(
-                      value: _selectedLevel,
-                      decoration: InputDecoration(
-                        labelText: 'User Level',
-                        prefixIcon: const Icon(Icons.security),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(theme.borderRadius),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(theme.borderRadius),
-                          borderSide: BorderSide(color: theme.primaryColor, width: 2),
-                        ),
-                      ),
-                      items: widget.availableLevels.map((String level) {
-                        return DropdownMenuItem<String>(
-                          value: level,
-                          child: Text(level.toUpperCase()),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedLevel = newValue;
-                          });
-                        }
-                      },
-                    ),
                   const SizedBox(height: 16),
                   
                   // Password input

@@ -9,7 +9,7 @@ export 'src/auth_service.dart';
 // Ready-to-use UI components
 export 'src/login_page.dart';
 export 'src/register_page.dart';
-export 'src/user_manager.dart';
+// export 'src/user_manager.dart'; // Temporarily disabled - needs redesign for Supabase Auth
 
 /// A Calculator (legacy - kept for backward compatibility).
 class Calculator {

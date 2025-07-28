@@ -1,43 +1,35 @@
-import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config.dart';
 
 /// User model for Basific authentication
 class BasificUser {
   final String id;
-  final String account;
-  final String name;
-  final String level;
+  final String email;
+  final String? name;
+  final String? avatarUrl;
+  final Map<String, dynamic>? metadata;
 
   const BasificUser({
     required this.id,
-    required this.account,
-    required this.name,
-    required this.level,
+    required this.email,
+    this.name,
+    this.avatarUrl,
+    this.metadata,
   });
 
-  factory BasificUser.fromMap(Map<String, dynamic> map) {
-    final config = Basific.config;
+  factory BasificUser.fromSupabaseUser(User user) {
     return BasificUser(
-      id: map[config.columnNames['id']!] ?? '',
-      account: map[config.columnNames['account']!] ?? '',
-      name: map[config.columnNames['name']!] ?? '',
-      level: map[config.columnNames['level']!] ?? 'user',
+      id: user.id,
+      email: user.email ?? '',
+      name: user.userMetadata?['name'] ?? user.userMetadata?['full_name'],
+      avatarUrl: user.userMetadata?['avatar_url'],
+      metadata: user.userMetadata,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    final config = Basific.config;
-    return {
-      config.columnNames['id']!: id,
-      config.columnNames['account']!: account,
-      config.columnNames['name']!: name,
-      config.columnNames['level']!: level,
-    };
   }
 
   @override
   String toString() {
-    return 'BasificUser(id: $id, account: $account, name: $name, level: $level)';
+    return 'BasificUser(id: $id, email: $email, name: $name)';
   }
 
   @override
@@ -55,154 +47,149 @@ class BasificAuth {
   static BasificUser? _currentUser;
 
   /// Get current authenticated user
-  static BasificUser? get currentUser => _currentUser;
+  static BasificUser? get currentUser {
+    if (_currentUser == null) {
+      final supabaseUser = Basific.supabase.auth.currentUser;
+      if (supabaseUser != null) {
+        _currentUser = BasificUser.fromSupabaseUser(supabaseUser);
+      }
+    }
+    return _currentUser;
+  }
 
   /// Check if user is authenticated
-  static bool get isAuthenticated => _currentUser != null;
+  static bool get isAuthenticated => currentUser != null;
 
-  /// Login with account and password
+  /// Login with email and password using Supabase Auth
   static Future<BasificAuthResult> login({
-    required String account,
+    required String email,
     required String password,
   }) async {
     try {
-      final config = Basific.config;
-      final response = await Basific.supabase
-          .from(config.accountTableName)
-          .select()
-          .eq(config.columnNames['account']!, account)
-          .eq(config.columnNames['password']!, password)
-          .maybeSingle();
+      final response = await Basific.supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
-      if (response != null) {
-        _currentUser = BasificUser.fromMap(response);
+      if (response.user != null) {
+        _currentUser = BasificUser.fromSupabaseUser(response.user!);
         return BasificAuthResult.success(_currentUser!);
       } else {
-        return BasificAuthResult.failure('Invalid account or password');
+        return BasificAuthResult.failure('Login failed');
       }
     } catch (error) {
       return BasificAuthResult.failure('Login failed: $error');
     }
   }
 
-  /// Register new user
+  /// Register new user with email and password using Supabase Auth
   static Future<BasificAuthResult> register({
-    required String account,
+    required String email,
     required String password,
-    required String name,
-    String level = 'user',
+    String? name,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
-      final config = Basific.config;
+      final authMetadata = <String, dynamic>{};
+      if (name != null) authMetadata['name'] = name;
+      if (metadata != null) authMetadata.addAll(metadata);
 
-      // Check if account already exists
-      final existingUser = await Basific.supabase
-          .from(config.accountTableName)
-          .select()
-          .eq(config.columnNames['account']!, account)
-          .maybeSingle();
+      final response = await Basific.supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: authMetadata.isNotEmpty ? authMetadata : null,
+      );
 
-      if (existingUser != null) {
-        return BasificAuthResult.failure('Account already exists');
+      if (response.user != null) {
+        _currentUser = BasificUser.fromSupabaseUser(response.user!);
+        return BasificAuthResult.success(_currentUser!);
+      } else {
+        return BasificAuthResult.failure('Registration failed');
       }
-
-      // Create new user
-      final newUserData = {
-        config.columnNames['account']!: account,
-        config.columnNames['password']!: password,
-        config.columnNames['name']!: name,
-        config.columnNames['level']!: level,
-      };
-
-      final response = await Basific.supabase
-          .from(config.accountTableName)
-          .insert(newUserData)
-          .select()
-          .single();
-
-      final user = BasificUser.fromMap(response);
-      return BasificAuthResult.success(user);
     } catch (error) {
       return BasificAuthResult.failure('Registration failed: $error');
     }
   }
 
-  /// Logout current user
-  static void logout() {
-    _currentUser = null;
+  /// Logout current user using Supabase Auth
+  static Future<BasificAuthResult> logout() async {
+    try {
+      await Basific.supabase.auth.signOut();
+      _currentUser = null;
+      return BasificAuthResult.success(null);
+    } catch (error) {
+      return BasificAuthResult.failure('Logout failed: $error');
+    }
   }
 
   /// Update user information
   static Future<BasificAuthResult> updateUser({
-    required String userId,
-    String? name,
-    String? level,
+    String? email,
+    String? password,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
-      final config = Basific.config;
-      final updateData = <String, dynamic>{};
-
-      if (name != null) updateData[config.columnNames['name']!] = name;
-      if (level != null) updateData[config.columnNames['level']!] = level;
-
-      if (updateData.isEmpty) {
-        return BasificAuthResult.failure('No data to update');
-      }
-
-      final response = await Basific.supabase
-          .from(config.accountTableName)
-          .update(updateData)
-          .eq(config.columnNames['id']!, userId)
-          .select()
-          .single();
-
-      final updatedUser = BasificUser.fromMap(response);
+      final updateAttributes = UserAttributes();
       
-      // Update current user if it's the same
-      if (_currentUser?.id == userId) {
-        _currentUser = updatedUser;
-      }
+      if (email != null) updateAttributes.email = email;
+      if (password != null) updateAttributes.password = password;
+      if (metadata != null) updateAttributes.data = metadata;
 
-      return BasificAuthResult.success(updatedUser);
+      final response = await Basific.supabase.auth.updateUser(updateAttributes);
+
+      if (response.user != null) {
+        _currentUser = BasificUser.fromSupabaseUser(response.user!);
+        return BasificAuthResult.success(_currentUser!);
+      } else {
+        return BasificAuthResult.failure('Update failed');
+      }
     } catch (error) {
       return BasificAuthResult.failure('Update failed: $error');
     }
   }
 
-  /// Delete user
-  static Future<BasificAuthResult> deleteUser(String userId) async {
+  /// Reset password
+  static Future<BasificAuthResult> resetPassword({
+    required String email,
+  }) async {
     try {
-      final config = Basific.config;
-      await Basific.supabase
-          .from(config.accountTableName)
-          .delete()
-          .eq(config.columnNames['id']!, userId);
-
-      // Logout if deleting current user
-      if (_currentUser?.id == userId) {
-        logout();
-      }
-
+      await Basific.supabase.auth.resetPasswordForEmail(email);
       return BasificAuthResult.success(null);
     } catch (error) {
-      return BasificAuthResult.failure('Delete failed: $error');
+      return BasificAuthResult.failure('Reset password failed: $error');
     }
   }
 
-  /// Get all users (admin function)
-  static Future<List<BasificUser>> getAllUsers() async {
-    try {
-      final config = Basific.config;
-      final response = await Basific.supabase
-          .from(config.accountTableName)
-          .select();
-
-      return response.map<BasificUser>((user) => BasificUser.fromMap(user)).toList();
-    } catch (error) {
-      if (kDebugMode) {
-        print('Failed to fetch users: $error');
+  /// Listen to auth state changes
+  static Stream<AuthState> get authStateChanges {
+    return Basific.supabase.auth.onAuthStateChange.map((data) {
+      if (data.session?.user != null) {
+        _currentUser = BasificUser.fromSupabaseUser(data.session!.user);
+      } else {
+        _currentUser = null;
       }
-      return [];
+      return data;
+    });
+  }
+
+  /// Check if the current session is valid
+  static bool get hasValidSession {
+    final session = Basific.supabase.auth.currentSession;
+    return session != null && !session.isExpired;
+  }
+
+  /// Refresh the current session
+  static Future<BasificAuthResult> refreshSession() async {
+    try {
+      final response = await Basific.supabase.auth.refreshSession();
+      if (response.user != null) {
+        _currentUser = BasificUser.fromSupabaseUser(response.user!);
+        return BasificAuthResult.success(_currentUser!);
+      } else {
+        return BasificAuthResult.failure('Session refresh failed');
+      }
+    } catch (error) {
+      return BasificAuthResult.failure('Session refresh failed: $error');
     }
   }
 }

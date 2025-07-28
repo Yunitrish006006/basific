@@ -30,7 +30,7 @@ class BasificLoginPage extends StatefulWidget {
 }
 
 class _BasificLoginPageState extends State<BasificLoginPage> {
-  final _accountController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -38,7 +38,7 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
 
   @override
   void dispose() {
-    _accountController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -54,7 +54,7 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
 
     try {
       final result = await BasificAuth.login(
-        account: _accountController.text.trim(),
+        email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
@@ -130,12 +130,13 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
                 ),
                 const SizedBox(height: 40),
                 
-                // Account input
+                // Email input
                 TextFormField(
-                  controller: _accountController,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Account',
-                    prefixIcon: const Icon(Icons.person),
+                    labelText: 'Email',
+                    prefixIcon: const Icon(Icons.email),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(theme.borderRadius),
                     ),
@@ -146,7 +147,12 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your account';
+                      return 'Please enter your email';
+                    }
+                    // Basic email validation
+                    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid email address';
                     }
                     return null;
                   },

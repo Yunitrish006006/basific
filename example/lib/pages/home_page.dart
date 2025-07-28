@@ -32,8 +32,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Text('取消'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
+                // Perform logout
+                await BasificAuth.logout();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -103,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '歡迎，${widget.currentUser!.name}',
+                        '歡迎，${widget.currentUser!.name ?? widget.currentUser!.email}',
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.grey,
