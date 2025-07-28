@@ -10,28 +10,29 @@ class BasificConfig {
   /// Supabase Anonymous Key
   final String supabaseAnonKey;
   
-  /// Table name for user accounts (default: 'account')
-  final String accountTableName;
+  /// Table name for user profiles (default: 'profiles')
+  final String profilesTableName;
   
-  /// Column names mapping for user table
-  final Map<String, String> columnNames;
+  /// Column name for username/display_name in profiles table (default: 'display_name')
+  final String usernameColumn;
+  
+  /// Column name for email in profiles table (default: 'email')
+  final String emailColumn;
   
   /// Theme configuration
   final BasificTheme theme;
+  
+  /// Enable username login feature (requires profiles table setup)
+  final bool enableUsernameLogin;
 
   const BasificConfig({
     required this.supabaseUrl,
     required this.supabaseAnonKey,
-    this.accountTableName = 'account',
-    this.columnNames = const {
-      'id': 'id',
-      'account': 'account',
-      'email': 'email',
-      'password': 'password',
-      'name': 'name',
-      'level': 'level',
-    },
+    this.profilesTableName = 'profiles',
+    this.usernameColumn = 'display_name',
+    this.emailColumn = 'email',
     this.theme = const BasificTheme(),
+    this.enableUsernameLogin = true,
   });
 }
 

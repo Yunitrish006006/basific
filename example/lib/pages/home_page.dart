@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:basific/basific.dart';
 import 'users_page.dart';
 import 'database_diagnostic_page.dart';
+import 'profiles_setup_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
@@ -122,6 +123,22 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                         icon: const Icon(Icons.bug_report),
                         label: const Text('資料庫診斷'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfilesSetupPage(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.settings),
+                        label: const Text('用戶名登入設定'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),

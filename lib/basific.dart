@@ -10,4 +10,8 @@ export 'src/auth_service.dart';
 export 'src/login_page.dart';
 export 'src/register_page.dart';
 export 'src/auth_wrapper.dart';
+
+// Helper utilities
+export 'src/profiles_helper.dart';
+
 // export 'src/user_manager.dart'; // Temporarily disabled - needs redesign for Supabase Auth
