@@ -82,24 +82,109 @@ class BasificAuth {
   /// Check if user is authenticated
   static bool get isAuthenticated => currentUser != null;
 
+  /// Helper method to check if input is an email
+  static bool _isEmail(String input) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(input.trim());
+  }
+
+  /// Login with username or email and password
+  static Future<BasificAuthResult> loginWithUsernameOrEmail({
+    required String usernameOrEmail,
+    required String password,
+  }) async {
+    try {
+      final input = usernameOrEmail.trim();
+      print('Login attempt with input: "$input"');
+      
+      // If input looks like an email, use it directly
+      if (_isEmail(input)) {
+        print('Input detected as email, logging in directly');
+        return await login(email: input, password: password);
+      }
+      
+      print('Input detected as username, looking up email');
+      // Otherwise, treat it as username and look up the email
+      final emailFromUsername = await _getEmailFromUsername(input);
+      if (emailFromUsername == null) {
+        print('Failed to find email for username: $input');
+        return BasificAuthResult.failure('Display name login not available. Please create a profiles table or use email to login. See PROFILES_SETUP.md for instructions.');
+      }
+      
+      print('Found email "$emailFromUsername" for username "$input", proceeding with login');
+      return await login(email: emailFromUsername, password: password);
+    } catch (error) {
+      print('Login with username/email failed: $error');
+      return BasificAuthResult.failure('Login failed: $error');
+    }
+  }
+
+  /// Helper method to get email from display name
+  /// Since we can't directly query auth.users due to RLS, we'll try a different approach
+  static Future<String?> _getEmailFromUsername(String displayName) async {
+    try {
+      print('Searching for display_name: $displayName');
+      
+      // For now, we'll try to use a profiles table if it exists
+      // This is a common pattern in Supabase apps
+      try {
+        final response = await Basific.supabase
+            .from('profiles')
+            .select('email, display_name')
+            .eq('display_name', displayName)
+            .maybeSingle();
+
+        print('Query response: $response');
+
+        if (response != null) {
+          final email = response['email'] as String?;
+          print('Found email for display_name "$displayName": $email');
+          return email;
+        } else {
+          print('No user found with display_name: $displayName');
+          return null;
+        }
+      } catch (e) {
+        print('Profiles table query error: $e');
+      }
+
+      // If profiles table doesn't exist, we can't easily lookup by display_name
+      // due to Supabase Auth security restrictions
+      print('Cannot lookup user by display_name. Consider creating a profiles table.');
+      return null;
+    } catch (error) {
+      print('Error getting email from display name: $error');
+      return null;
+    }
+  }
+
   /// Login with email and password using Supabase Auth
   static Future<BasificAuthResult> login({
     required String email,
     required String password,
   }) async {
     try {
+      print('Attempting login with email: $email');
+      
       final response = await Basific.supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
+      print('Login response received');
+      print('User: ${response.user?.email}');
+      print('Session: ${response.session?.accessToken != null ? "Valid" : "Invalid"}');
+
       if (response.user != null) {
         _currentUser = BasificUser.fromSupabaseUser(response.user!);
+        print('Login successful for: ${_currentUser!.email}');
         return BasificAuthResult.success(_currentUser!);
       } else {
+        print('Login failed: No user in response');
         return BasificAuthResult.failure('Login failed');
       }
     } catch (error) {
+      print('Login error: $error');
       return BasificAuthResult.failure('Login failed: $error');
     }
   }

@@ -30,7 +30,7 @@ class BasificLoginPage extends StatefulWidget {
 }
 
 class _BasificLoginPageState extends State<BasificLoginPage> {
-  final _emailController = TextEditingController();
+  final _loginController = TextEditingController(); // 改名為更通用的登入欄位
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -38,7 +38,7 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _loginController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -53,8 +53,8 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
     });
 
     try {
-      final result = await BasificAuth.login(
-        email: _emailController.text.trim(),
+      final result = await BasificAuth.loginWithUsernameOrEmail(
+        usernameOrEmail: _loginController.text.trim(),
         password: _passwordController.text,
       );
 
@@ -130,13 +130,14 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
                 ),
                 const SizedBox(height: 40),
                 
-                // Email input
+                // Email or Username input
                 TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _loginController,
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email),
+                    labelText: 'Email or Username',
+                    hintText: 'Enter your email or username',
+                    prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(theme.borderRadius),
                     ),
@@ -147,12 +148,7 @@ class _BasificLoginPageState extends State<BasificLoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    // Basic email validation
-                    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                    if (!emailRegex.hasMatch(value.trim())) {
-                      return 'Please enter a valid email address';
+                      return 'Please enter your email or username';
                     }
                     return null;
                   },

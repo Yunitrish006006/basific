@@ -26,6 +26,7 @@ class BasificConfig {
     this.columnNames = const {
       'id': 'id',
       'account': 'account',
+      'email': 'email',
       'password': 'password',
       'name': 'name',
       'level': 'level',
@@ -110,6 +111,11 @@ class Basific {
   /// Quick login method
   static Future<BasificAuthResult> login(String email, String password) {
     return BasificAuth.login(email: email, password: password);
+  }
+
+  /// Quick login method with username or email
+  static Future<BasificAuthResult> loginWithUsernameOrEmail(String usernameOrEmail, String password) {
+    return BasificAuth.loginWithUsernameOrEmail(usernameOrEmail: usernameOrEmail, password: password);
   }
 
   /// Quick register method
