@@ -56,7 +56,8 @@ class _BasificRegisterPageState extends State<BasificRegisterPage> {
       final result = await BasificAuth.register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        name: _nameController.text.trim(),
+        displayName: _nameController.text.trim(),
+        fullName: _nameController.text.trim(),
       );
 
       if (result.isSuccess && result.user != null) {

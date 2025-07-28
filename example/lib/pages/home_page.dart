@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '歡迎，${widget.currentUser!.name ?? widget.currentUser!.email}',
+                        '歡迎，${widget.currentUser!.bestDisplayName}',
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.grey,

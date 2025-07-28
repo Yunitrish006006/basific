@@ -5,15 +5,25 @@ import 'config.dart';
 class BasificUser {
   final String id;
   final String email;
+  final String? displayName;
   final String? name;
   final String? avatarUrl;
+  final String? phone;
+  final DateTime? emailConfirmedAt;
+  final DateTime? lastSignInAt;
+  final DateTime createdAt;
   final Map<String, dynamic>? metadata;
 
   const BasificUser({
     required this.id,
     required this.email,
+    required this.createdAt,
+    this.displayName,
     this.name,
     this.avatarUrl,
+    this.phone,
+    this.emailConfirmedAt,
+    this.lastSignInAt,
     this.metadata,
   });
 
@@ -21,15 +31,27 @@ class BasificUser {
     return BasificUser(
       id: user.id,
       email: user.email ?? '',
-      name: user.userMetadata?['name'] ?? user.userMetadata?['full_name'],
+      createdAt: DateTime.parse(user.createdAt),
+      displayName: user.userMetadata?['display_name'] ?? user.userMetadata?['name'],
+      name: user.userMetadata?['full_name'] ?? user.userMetadata?['name'],
       avatarUrl: user.userMetadata?['avatar_url'],
+      phone: user.phone,
+      emailConfirmedAt: user.emailConfirmedAt != null ? DateTime.parse(user.emailConfirmedAt!) : null,
+      lastSignInAt: user.lastSignInAt != null ? DateTime.parse(user.lastSignInAt!) : null,
       metadata: user.userMetadata,
     );
   }
 
+  /// Get the best available display name for the user
+  String get bestDisplayName {
+    if (displayName != null && displayName!.isNotEmpty) return displayName!;
+    if (name != null && name!.isNotEmpty) return name!;
+    return email.split('@').first; // Fallback to email prefix
+  }
+
   @override
   String toString() {
-    return 'BasificUser(id: $id, email: $email, name: $name)';
+    return 'BasificUser(id: $id, email: $email, displayName: $displayName, name: $name)';
   }
 
   @override
@@ -86,13 +108,18 @@ class BasificAuth {
   static Future<BasificAuthResult> register({
     required String email,
     required String password,
-    String? name,
-    Map<String, dynamic>? metadata,
+    String? displayName,
+    String? fullName,
+    String? avatarUrl,
+    Map<String, dynamic>? additionalMetadata,
   }) async {
     try {
       final authMetadata = <String, dynamic>{};
-      if (name != null) authMetadata['name'] = name;
-      if (metadata != null) authMetadata.addAll(metadata);
+      if (displayName != null) authMetadata['display_name'] = displayName;
+      if (fullName != null) authMetadata['full_name'] = fullName;
+      if (displayName != null) authMetadata['name'] = displayName; // Fallback compatibility
+      if (avatarUrl != null) authMetadata['avatar_url'] = avatarUrl;
+      if (additionalMetadata != null) authMetadata.addAll(additionalMetadata);
 
       final response = await Basific.supabase.auth.signUp(
         email: email,
