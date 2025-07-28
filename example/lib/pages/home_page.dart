@@ -17,50 +17,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _logout() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('確認登出'),
-          content: const Text('您確定要登出嗎？'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                // Perform logout
-                await BasificAuth.logout();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BasificLoginPage(
-                      title: 'Basific Example Login',
-                      onLoginSuccess: (user) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MyHomePage(
-                              title: 'Basific Example',
-                              currentUser: user,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
-              child: const Text('登出'),
-            ),
-          ],
-        );
-      },
+  void _logout() async {
+    await BasificAuthHelper.logoutAndNavigate(
+      context,
+      loginTitle: 'Basific Example Login',
     );
   }
 

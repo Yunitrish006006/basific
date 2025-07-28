@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
 
 /// Configuration class for Basific authentication
 class BasificConfig {
@@ -98,5 +99,41 @@ class Basific {
       throw Exception('Basific not initialized. Call Basific.initialize() first.');
     }
     return Supabase.instance.client;
+  }
+
+  /// Quick access to current authenticated user
+  static BasificUser? get currentUser => BasificAuth.currentUser;
+
+  /// Quick access to authentication status
+  static bool get isAuthenticated => BasificAuth.isAuthenticated;
+
+  /// Quick login method
+  static Future<BasificAuthResult> login(String email, String password) {
+    return BasificAuth.login(email: email, password: password);
+  }
+
+  /// Quick register method
+  static Future<BasificAuthResult> register({
+    required String email,
+    required String password,
+    String? displayName,
+    String? fullName,
+  }) {
+    return BasificAuth.register(
+      email: email,
+      password: password,
+      displayName: displayName,
+      fullName: fullName,
+    );
+  }
+
+  /// Quick logout method
+  static Future<BasificAuthResult> logout() {
+    return BasificAuth.logout();
+  }
+
+  /// Quick password reset method
+  static Future<BasificAuthResult> resetPassword(String email) {
+    return BasificAuth.resetPassword(email: email);
   }
 }
