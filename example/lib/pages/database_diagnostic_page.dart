@@ -129,7 +129,7 @@ class _DatabaseDiagnosticPageState extends State<DatabaseDiagnosticPage> {
       return {
         'check': '當前用戶',
         'status': 'OK',
-        'message': '已登入: ${user.email}\\n顯示名稱: ${user.bestDisplayName}',
+        'message': '已登入: ${user.email}\\n顯示名稱: ${user.bestDisplayName}\\n角色: ${user.role}',
         'icon': Icons.person,
         'color': Colors.green,
       };

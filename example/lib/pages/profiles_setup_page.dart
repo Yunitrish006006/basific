@@ -134,6 +134,86 @@ class _ProfilesSetupPageState extends State<ProfilesSetupPage> {
             ),
             const SizedBox(height: 16),
 
+            // Role Migration Section
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Role System Migration',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      '如果您的 profiles 表格已經存在但還沒有 role 欄位，請執行以下 SQL 來添加角色系統：',
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Role Migration SQL',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () => _copyToClipboard(BasificProfilesHelper.generateAddRoleColumnSQL()),
+                                icon: const Icon(Icons.copy, size: 16),
+                                label: const Text('Copy'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              BasificProfilesHelper.generateAddRoleColumnSQL(),
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      '角色系統功能：\n'
+                      '• 支援 "admin" 和 "user" 兩種角色\n'
+                      '• 新用戶默認為 "user" 角色\n'
+                      '• 可在註冊時指定角色\n'
+                      '• 提供便利的角色檢查方法',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Setup Instructions
             if (_isSetup != true) ...[
               Card(

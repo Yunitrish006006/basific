@@ -25,6 +25,15 @@ extension BasificUserExtension on User {
 
   /// Alias for bestDisplayName for backward compatibility
   String get name => bestDisplayName;
+
+  /// Get user role from user_metadata, defaults to 'user'
+  String get role => userMetadata?['role'] ?? 'user';
+
+  /// Check if user is admin
+  bool get isAdmin => role == 'admin';
+
+  /// Check if user is regular user
+  bool get isUser => role == 'user';
 }
 
 /// Result class for authentication operations
@@ -123,6 +132,7 @@ class BasificAuth {
     required String password,
     String? displayName,
     String? fullName,
+    String? role,
   }) async {
     try {
       final response = await _client.auth.signUp(
@@ -131,6 +141,7 @@ class BasificAuth {
         data: {
           if (displayName != null) 'display_name': displayName,
           if (fullName != null) 'full_name': fullName,
+          'role': role ?? 'user', // Default to 'user' if not specified
         },
       );
 

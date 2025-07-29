@@ -73,6 +73,22 @@ class _MyHomePageState extends State<MyHomePage> {
                           color: Colors.grey,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: widget.currentUser!.isAdmin ? Colors.red.shade100 : Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          widget.currentUser!.isAdmin ? '管理員' : '一般用戶',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: widget.currentUser!.isAdmin ? Colors.red.shade700 : Colors.blue.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -96,22 +112,27 @@ class _MyHomePageState extends State<MyHomePage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const UsersPage(),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.people),
-                        label: const Text('用戶管理'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(16),
+                      // 只有管理員才能看到用戶管理
+                      if (widget.currentUser!.isAdmin) ...[
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const UsersPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.people),
+                          label: const Text('用戶管理'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                            backgroundColor: Colors.red.shade50,
+                            foregroundColor: Colors.red.shade700,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 12),
+                      ],
                       ElevatedButton.icon(
                         onPressed: () {
                           Navigator.push(

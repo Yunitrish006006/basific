@@ -125,12 +125,14 @@ class Basific {
     required String password,
     String? displayName,
     String? fullName,
+    String? role,
   }) {
     return BasificAuth.register(
       email: email,
       password: password,
       displayName: displayName,
       fullName: fullName,
+      role: role,
     );
   }
 

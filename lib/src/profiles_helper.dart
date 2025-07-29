@@ -21,6 +21,7 @@ CREATE TABLE public.$table (
   $username TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
+  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -47,12 +48,13 @@ WITH CHECK (auth.uid() = id);
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS \$\$
 BEGIN
-  INSERT INTO public.$table (id, $email, $username, full_name)
+  INSERT INTO public.$table (id, $email, $username, full_name, role)
   VALUES (
     NEW.id,
     NEW.email,
     NEW.raw_user_meta_data->>'$username',
-    NEW.raw_user_meta_data->>'full_name'
+    NEW.raw_user_meta_data->>'full_name',
+    COALESCE(NEW.raw_user_meta_data->>'role', 'user')
   );
   RETURN NEW;
 END;
@@ -65,12 +67,13 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- 為現有的 auth.users 創建 profiles 記錄
-INSERT INTO public.$table (id, $email, $username, full_name)
+INSERT INTO public.$table (id, $email, $username, full_name, role)
 SELECT 
   id,
   email,
   raw_user_meta_data->>'$username' as $username,
-  raw_user_meta_data->>'full_name' as full_name
+  raw_user_meta_data->>'full_name' as full_name,
+  COALESCE(raw_user_meta_data->>'role', 'user') as role
 FROM auth.users
 WHERE id NOT IN (SELECT id FROM public.$table);
 ''';
@@ -123,6 +126,28 @@ SELECT COUNT(*) as total_profiles FROM public.$table;
 SELECT id, $email, $username, full_name 
 FROM public.$table 
 LIMIT 5;
+''';
+  }
+
+  /// Generate SQL script to add role column to existing profiles table
+  static String generateAddRoleColumnSQL({
+    String? tableName,
+  }) {
+    final config = Basific.config;
+    final table = tableName ?? config.profilesTableName;
+    
+    return '''
+-- 為現有的 $table 表格添加 role 欄位
+ALTER TABLE public.$table 
+ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user'));
+
+-- 為現有記錄設定默認角色
+UPDATE public.$table 
+SET role = 'user' 
+WHERE role IS NULL;
+
+-- 創建索引以提高查詢效能
+CREATE INDEX IF NOT EXISTS idx_${table}_role ON public.$table(role);
 ''';
   }
 
